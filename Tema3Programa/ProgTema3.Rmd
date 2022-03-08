@@ -1,0 +1,49 @@
+---
+title: "ProgTema3"
+author: "Josep A. Girbés Plaza, Carles V. Adam Castañer"
+date: "7/3/2022"
+output: html_document
+---
+
+Crear un gráfico como el del ejemplo, añadiendo una línea más gruesa que represente los datos de España. El gráfico se generará en html y será interactivo.
+
+```{r}
+#Cargamos las librerías necesarias:
+library(ggplot2)
+library(readr)
+library(plotly)
+```
+
+```{r}
+
+#Pasamos a una variable un vector con todos los países. 
+countries <- c("United States", "Italy", "France", "Germany", "Canada", "Japan", "United Kingdom", "Spain")
+
+#Leemos el documento csv original y exportamos el data frame.
+#A continuación creamos un nuevo df con solo la información pedida a graficar.
+df <- read.csv(file = 'owid-covid-data.csv')
+df2 <- df[df$location%in%countries,c("location", "date", "new_deaths_smoothed_per_million")]
+
+```
+
+```{r}
+
+#Creamos una variable de colores que se asignarán en orden alfabético a los países seleccionados.
+colores <- c("brown", "darkred", "green", "cyan4", "113", "black", "deeppink", "darkorchid4")
+
+#Creamos ya la gráfica final:
+rep <- ggplot(df2, aes(x = as.Date(date), y = abs(new_deaths_smoothed_per_million), col = location)) +
+  geom_line() +
+  geom_line(data = subset(df2, location == "Spain"), size = 1.2) +
+  scale_color_manual(values = colores) +
+  labs(title= "Daily new confirmed COVID-19 deaths per million people", subtitle = "7-day rolling average. For some countries the number of confirmed deaths is much lower than the true number of deaths. This is because of limited testing and challenges in the attribution of the cause of death.", caption = "Source: Johns Hopkins University CSSE COVID-19 Data", x = "", y = "") +
+  theme(panel.grid = element_line(size = 0.5, linetype = "dotted"),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        )
+
+rep
+
+#Finalmente, hacemos el gráfico interactivo:
+ggplotly(rep)
+```
